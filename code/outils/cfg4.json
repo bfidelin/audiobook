@@ -1,0 +1,16 @@
+{
+ "voice": "/data/voice4.wav",
+ "out": "/data/mix4_events.wav",
+ "beds_dir": "/data",
+ "events_dir": "/data",
+ "beds": [
+  {"t": 95.5,  "file": "out/12_bar_nuit.bed.wav"},
+  {"t": 452.6, "file": "out/04_squat_fete.bed.wav"},
+  {"t": 642.9, "file": "out/04_squat_fete.bed.wav"},
+  {"t": 992.1, "file": "out/12_bar_nuit.bed.wav"}
+ ],
+ "events": [
+  {"t": 300.0, "file": "sfx3/porte_claque.sfx.wav", "gain_db": -6},
+  {"t": 700.0, "file": "sfx3/verres_bar.sfx.wav",  "gain_db": -10}
+ ]
+}

@@ -1,0 +1,12 @@
+FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
+
+# Stable Audio 3 : torch 2.7.1 exactement (sm_120 supporte depuis 2.7).
+# Small-SFX n'exige pas Flash Attention 2 (seul Medium l'impose).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg libsndfile1 git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir ninja \
+    && pip install --no-cache-dir "git+https://github.com/Stability-AI/stable-audio-3.git"
+
+WORKDIR /work
