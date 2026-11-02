@@ -1,0 +1,13 @@
+FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
+
+# AudioX tourne sur stable-audio-tools, qui epingle torch 2.7.1 : c'est
+# exactement la base de cette image, et 2.7 supporte sm_120 (Blackwell).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg libsndfile1 git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth 1 https://github.com/ZeyueT/AudioX.git /opt/AudioX
+ENV PYTHONPATH=/opt/AudioX
+RUN pip install --no-cache-dir huggingface_hub soundfile
+
+WORKDIR /work
