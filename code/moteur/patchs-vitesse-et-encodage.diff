@@ -1,0 +1,113 @@
+diff --git a/Dockerfile b/Dockerfile
+index d3dfdba..80b9b13 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -31,3 +31,6 @@ ENV ALEXANDRIA_HOST=0.0.0.0
+ EXPOSE 4200
+ 
+ CMD ["python", "app/app.py"]
++
++# Keep image code available when /alexandria holds persistent project data.
++RUN cp -a /alexandria /opt/alexandria-dist
+diff --git a/app/project.py b/app/project.py
+index 8355c7e..cdacf5b 100644
+--- a/app/project.py
++++ b/app/project.py
+@@ -360,11 +360,11 @@ class ProjectManager:
+                          self._update_chunk_fields(index, status="error")
+                          return False, "Generated audio has 0 duration"
+ 
+-                    mp3_filename = f"{filename_base}.mp3"
++                    mp3_filename = f"{filename_base}.flac"
+                     mp3_filepath = os.path.join(self.voicelines_dir, mp3_filename)
+ 
+                     # This might fail if ffmpeg is missing or lacks MP3 encoder
+-                    segment.export(mp3_filepath, format="mp3")
++                    segment.export(mp3_filepath, format="flac")
+ 
+                     # Validate: conda ffmpeg often lacks libmp3lame, producing
+                     # a tiny (~428 byte) header-only file without raising an error
+@@ -451,12 +451,52 @@ class ProjectManager:
+         speakers = [chunk["speaker"] for chunk, _, _ in timeline]
+         pause_overrides = [chunk.get("pause_after") for chunk, _, _ in timeline]
+ 
+-        final_audio = combine_audio_with_pauses(
+-            audio_segments, speakers, pause_ms, same_speaker_pause_ms, pause_overrides
+-        )
+-        output_filename = "cloned_audiobook.mp3"
+-        output_path = os.path.join(self.root_dir, output_filename)
+-        final_audio.export(output_path, format="mp3")
++        # Fusion ffmpeg : un seul decodage de tous les segments, un seul encodage.
++        import tempfile
++        workdir = tempfile.mkdtemp(prefix="alex-merge-")
++        try:
++            gaps = {pause_ms, same_speaker_pause_ms} | {
++                int(p) for p in pause_overrides if p is not None
++            }
++            silences = {}
++            for ms in gaps:
++                if ms <= 0:
++                    continue
++                sfile = os.path.join(workdir, f"sil_{ms}.mp3")
++                subprocess.run(
++                    ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
++                     "-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono",
++                     "-t", f"{ms / 1000:.3f}", "-c:a", "libmp3lame", "-b:a", "32k", sfile],
++                    check=True,
++                )
++                silences[ms] = sfile
++            lines, prev = [], None
++            for chunk, _segment, _start in timeline:
++                if prev is not None:
++                    gap = (same_speaker_pause_ms if chunk["speaker"] == prev["speaker"]
++                           else pause_ms)
++                    override = chunk.get("pause_after")
++                    if override is not None:
++                        gap = int(override)
++                    if gap > 0:
++                        lines.append("file '%s'" % silences[gap])
++                lines.append("file '%s'" % os.path.join(self.root_dir, chunk["audio_path"]))
++                prev = chunk
++            concat_path = os.path.join(workdir, "concat.txt")
++            with open(concat_path, "w", encoding="utf-8") as fh:
++                fh.write("\n".join(lines) + "\n")
++            output_filename = "cloned_audiobook.mp3"
++            output_path = os.path.join(self.root_dir, output_filename)
++            subprocess.run(
++                ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
++                 "-f", "concat", "-safe", "0", "-i", concat_path,
++                 "-ac", "1", "-ar", "24000", "-c:a", "libmp3lame",
++                 "-b:a", os.environ.get("ALEX_MP3_BITRATE", "64k"), output_path],
++                check=True,
++            )
++        finally:
++            import shutil
++            shutil.rmtree(workdir, ignore_errors=True)
+ 
+         return True, output_filename
+ 
+@@ -617,7 +657,7 @@ class ProjectManager:
+                 cmd += ["-map", "1:v", "-c:v", "copy", "-disposition:v:0", "attached_pic"]
+             cmd += [
+                 "-c:a", "aac",
+-                "-b:a", "128k",
++                "-b:a", os.environ.get("ALEX_M4B_BITRATE", "64k"),
+                 "-movflags", "+faststart",
+                 output_path
+             ]
+diff --git a/app/tts.py b/app/tts.py
+index 3129525..620d3b0 100644
+--- a/app/tts.py
++++ b/app/tts.py
+@@ -1339,6 +1339,11 @@ class TTSEngine:
+             print("Running batch warmup generation...")
+             self._warmup_model(warmup_model)
+             self._warmup_needed = False
++            # Le CustomVoice ne sert qu'au warmup : le liberer rend ~3,5 Go de
++            # VRAM, ce qui fait passer la taille de lot du clonage de 10 a ~15.
++            self._local_custom_model = None
++            del warmup_model
++            self._clear_gpu_cache()
+ 
+         self._clear_gpu_cache()
+ 
