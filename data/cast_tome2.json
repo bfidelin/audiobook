@@ -1,0 +1,90 @@
+{
+ "_source": "analyse du 3 novembre 2026 sur l'EPUB du tome 2, 107169 mots",
+ "a_cloner": [
+  {
+   "nom": "CHARLES",
+   "role": "majeur",
+   "genre": "homme",
+   "age_estime": 70,
+   "repliques_estimees": 77,
+   "mentions": 68,
+   "note": "absent du tome 1, vit avec la Vero, decrit comme le vieux Charles"
+  },
+  {
+   "nom": "ANTOINE",
+   "role": "secondaire",
+   "genre": "homme",
+   "age_estime": 28,
+   "repliques_estimees": 17,
+   "mentions": 40,
+   "note": "fils de Dopalet, altercation sur la passerelle avec Aicha et Celeste"
+  },
+  {
+   "nom": "VERO",
+   "role": "mineur",
+   "genre": "femme",
+   "age_estime": 50,
+   "repliques_estimees": 1,
+   "mentions": 22,
+   "note": "compagne de Charles, une seule replique, peut rester au narrateur"
+  }
+ ],
+ "reexistants_a_garder": [
+  "NARRATOR",
+  "VERNON",
+  "LA HYÈNE",
+  "OLGA",
+  "PATRICE",
+  "GAËLLE",
+  "PAMELA",
+  "XAVIER",
+  "AÏCHA",
+  "LOIC",
+  "LAURENT",
+  "CELESTE",
+  "EMILIE",
+  "ANAIS",
+  "SELIM",
+  "LYDIA",
+  "DANIEL",
+  "NOEL",
+  "MARIE-ANGE",
+  "ALEX"
+ ],
+ "a_archiver_pour_le_tome_2": [
+  "MARCIA",
+  "CECILE",
+  "KIKO",
+  "ALEXANDRE",
+  "BERTRAND",
+  "SOPHIE",
+  "DEBORAH",
+  "CASSANDRE",
+  "JP",
+  "PAUL",
+  "AMELIE",
+  "LE CHEF",
+  "LA CLODOTE",
+  "WOMAN"
+ ],
+ "faux_positifs": {
+  "Bleach": "Alex Bleach, voix ALEX existante",
+  "Kant": "Pamela Kant, voix PAMELA existante",
+  "Rosa": "le bar Rosa Bonheur, un lieu",
+  "Bazooka": "Lydia Bazooka, voix LYDIA existante",
+  "Satana": "Faiza renommee, mentionnee sans parler",
+  "Sylvie": "citee, zero replique",
+  "Pénélope": "citee, zero replique",
+  "Clara": "un bebe",
+  "Kevin": "cite",
+  "Francesca": "citee",
+  "Max": "Max Romeo, musicien"
+ },
+ "references": {
+  "total": 35,
+  "valides": 35,
+  "duree_min_s": 16.0,
+  "sur_voix_humaine_reelle": 9,
+  "sur_preview_synthetique": 26
+ }
+}
