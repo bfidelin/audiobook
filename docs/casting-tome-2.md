@@ -112,3 +112,31 @@ Le point d'entrée LLM configuré (`http://192.168.1.190:8888/v1`) **ne répond
 pas**. Sans lui, pas d'annotation du script : c'est l'étape qui produit les
 4 795 entrées `{speaker, text, instruct}`. Le rendu TTS ne peut pas démarrer
 avant que ce service soit de nouveau disponible.
+
+## Voix retenues
+
+| Rôle | Voix | Source | F0 |
+|---|---|---|---|
+| CHARLES | Jean-Pierre Darroussin | YouTube `oKWuSROw0wU`, 357-381 s (entretien autour de *Des hommes*) | 98 Hz |
+| ANTOINE | Pierre Niney | YouTube `fLWvbnxVOnI`, 558-578 s (« L'interview sans filtre ») | 136 Hz |
+| VÉRO | voix `CECILE` existante | — | — |
+
+Charles et Antoine viennent de parole humaine réelle, pas de previews
+synthétiques. Les deux voix masculines sont nettement distinctes (98 contre
+136 Hz), ce qui les rend reconnaissables en dialogue.
+
+Véro n'a **qu'une réplique** dans tout le tome 2 : plutôt que de courser une
+source propre pour un seul mot, la rôle est rattaché à `CECILE`, voix féminine
+déjà conçue et absente du tome 2.
+
+Une tentative sur Josiane Balasko a été écartée : l'extrait choisi
+automatiquement (`fbnLwDtIljs`, 808-828 s) mesurait 133 Hz, dans la plage
+masculine — c'était l'intervieweur, pas elle. Leçon : toujours vérifier le F0
+avant d'accepter un extrait, la note de qualité du script ne détecte pas un
+changement de locuteur.
+
+## Contrôle avant rendu
+
+`code/voix/audit_locuteurs.py` confronte les locuteurs du script annoté aux voix
+configurées et signale ceux qui n'en ont pas. À lancer systématiquement : le
+modèle invente des personnages.
